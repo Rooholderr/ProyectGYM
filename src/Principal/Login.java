@@ -13,88 +13,148 @@ public class Login extends JFrame implements ActionListener {
     private static final String ARCHIVO_USUARIOS = "usuarios.txt";
 
     public Login() {
-        setTitle("Inicio de Sesión");
-        setSize(350, 200);
+        setTitle("IronZone");
+        setSize(450, 600); // Tamaño aumentado
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setResizable(false);
 
-        // ✅ Asegurar que el usuario "Ronald" existe en el archivo antes de abrir el login
         verificarAdminEnArchivo();
 
-        JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 10, 5, 10);
+        // Panel principal con fondo blanco
+        JPanel contenedor = new JPanel();
+        contenedor.setLayout(null);
+        contenedor.setBackground(Color.WHITE);
+        setContentPane(contenedor);
 
-        gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.LINE_END;
-        panel.add(new JLabel("Nombre Usuario:"), gbc);
-        gbc.gridx = 1; gbc.anchor = GridBagConstraints.LINE_START;
-        txtNombre = new JTextField(15);
-        panel.add(txtNombre, gbc);
+        // Imagen superior (450 x 230)
+        ImageIcon iconoPesas = new ImageIcon(getClass().getResource("/Principal/zone2.png")); // imagen
+        Image imagen = iconoPesas.getImage().getScaledInstance(450, 230, Image.SCALE_SMOOTH);
+        JLabel imagenArriba = new JLabel(new ImageIcon(imagen));
+        imagenArriba.setBounds(0, 0, 450, 230);
+        contenedor.add(imagenArriba);
+        // Título centrado
+        JLabel lblTitulo = new JLabel("INICIAR SESIÓN", SwingConstants.CENTER);
+        lblTitulo.setFont(new Font("Arial", Font.BOLD, 23)); // Más grande
+        lblTitulo.setForeground(Color.BLACK); // Letras negras
+        lblTitulo.setBounds(0, 240, 450, 40); // Centrado horizontal total
+        contenedor.add(lblTitulo);
 
-        gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.LINE_END;
-        panel.add(new JLabel("Contraseña:"), gbc);
-        gbc.gridx = 1; gbc.anchor = GridBagConstraints.LINE_START;
-        txtPassword = new JPasswordField(15);
-        panel.add(txtPassword, gbc);
+        contenedor.add(lblTitulo);
 
-        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.CENTER;
-        btnLogin = new JButton("Iniciar Sesión");
+        // USUARIO
+        JLabel lblUsuario = new JLabel("USUARIO");
+        lblUsuario.setFont(new Font("Arial", Font.BOLD, 14));
+        lblUsuario.setBounds(50, 280, 200, 20);
+        contenedor.add(lblUsuario);
+
+        txtNombre = new JTextField();
+        txtNombre.setBounds(50, 305, 330, 30);
+        txtNombre.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.BLACK));
+        txtNombre.setFont(new Font("Arial", Font.PLAIN, 14));
+        txtNombre.setForeground(Color.GRAY);
+        txtNombre.setText("Ingrese su nombre de usuario");
+        txtNombre.addFocusListener(new FocusAdapter() {
+            public void focusGained(FocusEvent e) {
+                if (txtNombre.getText().equals("Ingrese su nombre de usuario")) {
+                    txtNombre.setText("");
+                    txtNombre.setForeground(Color.BLACK);
+                }
+            }
+
+            public void focusLost(FocusEvent e) {
+                if (txtNombre.getText().isEmpty()) {
+                    txtNombre.setForeground(Color.GRAY);
+                    txtNombre.setText("Ingrese su nombre de usuario");
+                }
+            }
+        });
+        contenedor.add(txtNombre);
+
+        // CONTRASEÑA
+        JLabel lblPassword = new JLabel("CONTRASEÑA");
+        lblPassword.setFont(new Font("Arial", Font.BOLD, 14));
+        lblPassword.setBounds(50, 350, 200, 20);
+        contenedor.add(lblPassword);
+
+        txtPassword = new JPasswordField();
+        txtPassword.setBounds(50, 375, 330, 30);
+        txtPassword.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.BLACK));
+        txtPassword.setFont(new Font("Arial", Font.PLAIN, 14));
+        contenedor.add(txtPassword);
+
+        // BOTÓN
+        btnLogin = new JButton("Entrar");
+        btnLogin.setBounds(170, 440, 100, 35);
+        btnLogin.setBackground(Color.DARK_GRAY);
+        btnLogin.setForeground(Color.WHITE);
+        btnLogin.setFocusPainted(false);
         btnLogin.addActionListener(this);
-        panel.add(btnLogin, gbc);
+        contenedor.add(btnLogin);
 
-        add(panel);
         setVisible(true);
     }
 
-@Override
-public void actionPerformed(ActionEvent e) {
-    if (e.getSource() == btnLogin) {
-        String nombre = txtNombre.getText().trim();
-        String password = new String(txtPassword.getPassword()).trim();
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == btnLogin) {
+            String nombre = txtNombre.getText().trim();
+            String password = new String(txtPassword.getPassword()).trim();
 
-        if (nombre.isEmpty() || password.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Por favor, ingrese su nombre y contraseña.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+            if (nombre.isEmpty() || nombre.equals("Ingrese su nombre de usuario") || password.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Por favor, ingrese su nombre y contraseña.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-        // ✅ Validar usuario en archivo
-        int nivelAcceso = validarUsuarioEnArchivo(nombre, password);
-        if (nivelAcceso != -1) {
-            JOptionPane.showMessageDialog(this, "Bienvenido " + nombre, "Acceso permitido", JOptionPane.INFORMATION_MESSAGE);
-            this.dispose(); // Cerrar login
-            new MenuPrincipal(nivelAcceso, nombre); // ✅ Pasamos el nombre al menú
-        } else {
-            JOptionPane.showMessageDialog(this, "Nombre o contraseña incorrectos", "Error", JOptionPane.ERROR_MESSAGE);
-            txtPassword.setText(""); // Limpiar campo contraseña
-        }
-    }
-}
+            File archivo = new File(ARCHIVO_USUARIOS);
+            if (!archivo.exists() || archivo.length() == 0) {
+                JOptionPane.showMessageDialog(this, "No hay usuarios registrados en el sistema.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
+            try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+                String linea;
+                boolean usuarioEncontrado = false;
+                boolean passwordCorrecta = false;
+                int nivelAcceso = -1;
 
-    // ✅ Validar usuario en archivo `usuarios.txt`
-    private int validarUsuarioEnArchivo(String nombre, String password) {
-        try (BufferedReader br = new BufferedReader(new FileReader(ARCHIVO_USUARIOS))) {
-            String linea;
-            while ((linea = br.readLine()) != null) {
-                String[] datos = linea.split(",");
-                if (datos.length == 6) {
-                    String nombreArchivo = datos[1].trim();
-                    String passwordArchivo = datos[4].trim();
-                    int nivelAcceso = Integer.parseInt(datos[5].trim());
+                while ((linea = br.readLine()) != null) {
+                    String[] datos = linea.split(",");
+                    if (datos.length == 6) {
+                        String nombreArchivo = datos[1].trim();
+                        String passwordArchivo = datos[4].trim();
 
-                    if (nombreArchivo.equalsIgnoreCase(nombre) && passwordArchivo.equals(password)) {
-                        return nivelAcceso; // ✅ Retorna el nivel de acceso si coincide
+                        if (nombreArchivo.equalsIgnoreCase(nombre)) {
+                            usuarioEncontrado = true;
+
+                            if (passwordArchivo.equals(password)) {
+                                passwordCorrecta = true;
+                                nivelAcceso = Integer.parseInt(datos[5].trim());
+                                break;
+                            }
+                        }
                     }
                 }
+
+                if (!usuarioEncontrado) {
+                    JOptionPane.showMessageDialog(this, "El usuario no existe.", "Error", JOptionPane.ERROR_MESSAGE);
+                    txtNombre.requestFocus();
+                } else if (!passwordCorrecta) {
+                    JOptionPane.showMessageDialog(this, "Contraseña incorrecta.", "Error", JOptionPane.ERROR_MESSAGE);
+                    txtPassword.setText("");
+                    txtPassword.requestFocus();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Bienvenido " + nombre, "Acceso permitido", JOptionPane.INFORMATION_MESSAGE);
+                    this.dispose();
+                    new MenuPrincipal(nivelAcceso, nombre);
+                }
+
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Error al leer el archivo de usuarios.", "Error", JOptionPane.ERROR_MESSAGE);
             }
-        } catch (IOException e) {
-            System.out.println("Error al leer el archivo de usuarios.");
         }
-        return -1; // ❌ Usuario no encontrado
     }
 
-    // ✅ Verificar si el administrador "Ronald" está en el archivo
     private void verificarAdminEnArchivo() {
         boolean existeAdmin = false;
 
@@ -111,7 +171,6 @@ public void actionPerformed(ActionEvent e) {
             System.out.println("El archivo de usuarios no existe, se creará uno nuevo.");
         }
 
-        // ✅ Si Ronald no existe en el archivo, lo agregamos
         if (!existeAdmin) {
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(ARCHIVO_USUARIOS, true))) {
                 bw.write("1,Ronald,Administrador,admin@gmail.com,12345,0");
