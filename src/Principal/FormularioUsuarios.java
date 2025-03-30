@@ -11,60 +11,69 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
     private JTextField txtIdUsuario, txtNombre, txtApellidos, txtCorreo;
     private JPasswordField txtPassword;
     private JComboBox<String> cbNivelAcceso;
-    private JButton btnGuardar, btnMostrar;
+    private JButton btnGuardar, btnMostrar, btnModificar, btnEliminar;
 
-    // ✅ Lista de usuarios
     public static ArrayList<Usuario> listaUsuarios = new ArrayList<>();
     private static final String ARCHIVO_USUARIOS = "usuarios.txt";
 
     public FormularioUsuarios() {
         setTitle("Gestión de Usuarios");
-        setSize(400, 350);
+        setSize(450, 400);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        // ✅ Cargar usuarios desde el archivo
         cargarUsuariosDesdeArchivo();
-
-        // ✅ Agregar usuario ADMIN "Ronald" si no está en la lista
         agregarAdministradorFijo();
 
         JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(new Color(15, 15, 30)); // Fondo oscuro moderno
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 10, 5, 10);
 
         gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.LINE_END;
-        panel.add(new JLabel("ID Usuario:"), gbc);
+        JLabel lblId = new JLabel("ID Usuario:");
+        lblId.setForeground(Color.WHITE);
+        panel.add(lblId, gbc);
         gbc.gridx = 1; gbc.anchor = GridBagConstraints.LINE_START;
         txtIdUsuario = new JTextField(15);
         panel.add(txtIdUsuario, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.LINE_END;
-        panel.add(new JLabel("Nombre:"), gbc);
+        JLabel lblNombre = new JLabel("Nombre:");
+        lblNombre.setForeground(Color.WHITE);
+        panel.add(lblNombre, gbc);
         gbc.gridx = 1; gbc.anchor = GridBagConstraints.LINE_START;
         txtNombre = new JTextField(15);
         panel.add(txtNombre, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2; gbc.anchor = GridBagConstraints.LINE_END;
-        panel.add(new JLabel("Apellidos:"), gbc);
+        JLabel lblApellidos = new JLabel("Apellidos:");
+        lblApellidos.setForeground(Color.WHITE);
+        panel.add(lblApellidos, gbc);
         gbc.gridx = 1; gbc.anchor = GridBagConstraints.LINE_START;
         txtApellidos = new JTextField(15);
         panel.add(txtApellidos, gbc);
 
         gbc.gridx = 0; gbc.gridy = 3; gbc.anchor = GridBagConstraints.LINE_END;
-        panel.add(new JLabel("Correo Electrónico:"), gbc);
+        JLabel lblCorreo = new JLabel("Correo Electrónico:");
+        lblCorreo.setForeground(Color.WHITE);
+        panel.add(lblCorreo, gbc);
         gbc.gridx = 1; gbc.anchor = GridBagConstraints.LINE_START;
         txtCorreo = new JTextField(15);
         panel.add(txtCorreo, gbc);
 
         gbc.gridx = 0; gbc.gridy = 4; gbc.anchor = GridBagConstraints.LINE_END;
-        panel.add(new JLabel("Contraseña:"), gbc);
+        JLabel lblPassword = new JLabel("Contraseña:");
+        lblPassword.setForeground(Color.WHITE);
+        panel.add(lblPassword, gbc);
         gbc.gridx = 1; gbc.anchor = GridBagConstraints.LINE_START;
         txtPassword = new JPasswordField(15);
         panel.add(txtPassword, gbc);
 
         gbc.gridx = 0; gbc.gridy = 5; gbc.anchor = GridBagConstraints.LINE_END;
-        panel.add(new JLabel("Nivel de Acceso:"), gbc);
+        JLabel lblNivel = new JLabel("Nivel de Acceso:");
+        lblNivel.setForeground(Color.WHITE);
+        panel.add(lblNivel, gbc);
         gbc.gridx = 1; gbc.anchor = GridBagConstraints.LINE_START;
         String[] niveles = {"0 - Administrador", "1 - Usuario Normal"};
         cbNivelAcceso = new JComboBox<>(niveles);
@@ -72,40 +81,220 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
 
         gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
+
+        JPanel panelBotones = new JPanel(new GridLayout(1, 4, 5, 5));
+        panelBotones.setBackground(new Color(15, 15, 30));
+
         btnGuardar = new JButton("Guardar");
+        btnGuardar.setBackground(new Color(255, 215, 0));
+        btnGuardar.setForeground(Color.BLACK);
+        btnModificar = new JButton("Modificar");
+        btnModificar.setBackground(new Color(255, 215, 0));
+        btnModificar.setForeground(Color.BLACK);
+        btnEliminar = new JButton("Eliminar");
+        btnEliminar.setBackground(new Color(255, 215, 0));
+        btnEliminar.setForeground(Color.BLACK);
+        btnMostrar = new JButton("Mostrar");
+        btnMostrar.setBackground(new Color(255, 215, 0));
+        btnMostrar.setForeground(Color.BLACK);
+
         btnGuardar.addActionListener(this);
-        panel.add(btnGuardar, gbc);
+        btnModificar.addActionListener(this);
+        btnEliminar.addActionListener(this);
+        btnMostrar.addActionListener(this);
+
+        panelBotones.add(btnGuardar);
+        panelBotones.add(btnModificar);
+        panelBotones.add(btnEliminar);
+        panelBotones.add(btnMostrar);
+
+        panel.add(panelBotones, gbc);
+
+        txtIdUsuario.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                String textoId = txtIdUsuario.getText().trim();
+                if (textoId.isEmpty()) {
+                    limpiarCampos();
+                    return;
+                }
+                try {
+                    int id = Integer.parseInt(textoId);
+                    for (Usuario u : listaUsuarios) {
+                        if (u.getIdUsuario() == id) {
+                            txtNombre.setText(u.getNombre());
+                            txtApellidos.setText(u.getApellidos());
+                            txtCorreo.setText(u.getCorreo());
+                            txtPassword.setText(u.getPassword());
+                            cbNivelAcceso.setSelectedIndex(u.getNivelAcceso());
+                            return;
+                        }
+                    }
+                } catch (NumberFormatException ex) {
+                    // No limpiar
+                }
+            }
+        });
+
+        txtNombre.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                String nombreIngresado = txtNombre.getText().trim();
+                if (nombreIngresado.isEmpty()) {
+                    limpiarCampos();
+                    return;
+                }
+                for (Usuario u : listaUsuarios) {
+                    if (u.getNombre().equalsIgnoreCase(nombreIngresado)) {
+                        txtIdUsuario.setText(String.valueOf(u.getIdUsuario()));
+                        txtApellidos.setText(u.getApellidos());
+                        txtCorreo.setText(u.getCorreo());
+                        txtPassword.setText(u.getPassword());
+                        cbNivelAcceso.setSelectedIndex(u.getNivelAcceso());
+                        return;
+                    }
+                }
+            }
+        });
 
         add(panel);
         setVisible(true);
     }
+    // Resto del código permanece igual
+
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == btnGuardar) {
-            try {
-                int idUsuario = Integer.parseInt(txtIdUsuario.getText().trim());
+        try {
+            int idUsuario = Integer.parseInt(txtIdUsuario.getText().trim());
+
+            if (e.getSource() == btnGuardar) {
+                for (Usuario u : listaUsuarios) {
+                    if (u.getIdUsuario() == idUsuario) {
+                        JOptionPane.showMessageDialog(this, "Ya existe un usuario con este ID.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                }
+
                 String nombre = txtNombre.getText().trim();
                 String apellidos = txtApellidos.getText().trim();
                 String correo = txtCorreo.getText().trim();
                 String password = new String(txtPassword.getPassword()).trim();
-                int nivelAcceso = cbNivelAcceso.getSelectedIndex(); // 0 o 1
+                int nivelAcceso = cbNivelAcceso.getSelectedIndex();
 
                 if (nombre.isEmpty() || apellidos.isEmpty() || correo.isEmpty() || password.isEmpty()) {
                     JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                // Guardar usuario en la lista y archivo
                 Usuario nuevoUsuario = new Usuario(idUsuario, nombre, apellidos, correo, password, nivelAcceso);
                 listaUsuarios.add(nuevoUsuario);
                 guardarUsuariosEnArchivo();
                 JOptionPane.showMessageDialog(this, "Usuario guardado exitosamente.");
                 limpiarCampos();
-            } catch (NumberFormatException ex) {
+            } else if (e.getSource() == btnModificar) {
+                boolean encontrado = false;
+                for (Usuario u : listaUsuarios) {
+                    if (u.getIdUsuario() == idUsuario) {
+                        u.setNombre(txtNombre.getText().trim());
+                        u.setApellidos(txtApellidos.getText().trim());
+                        u.setCorreo(txtCorreo.getText().trim());
+                        u.setPassword(new String(txtPassword.getPassword()).trim());
+                        u.setNivelAcceso(cbNivelAcceso.getSelectedIndex());
+                        encontrado = true;
+                        break;
+                    }
+                }
+                if (encontrado) {
+                    guardarUsuariosEnArchivo();
+                    JOptionPane.showMessageDialog(this, "Usuario modificado.");
+                    limpiarCampos();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Usuario no encontrado.");
+                }
+            } else if (e.getSource() == btnEliminar) {
+                boolean eliminado = listaUsuarios.removeIf(u -> u.getIdUsuario() == idUsuario && !u.getNombre().equalsIgnoreCase("Ronald"));
+                if (eliminado) {
+                    guardarUsuariosEnArchivo();
+                    JOptionPane.showMessageDialog(this, "Usuario eliminado.");
+                    limpiarCampos();
+                } else {
+                    JOptionPane.showMessageDialog(this, "No se puede eliminar este usuario o no existe.");
+                }
+            }
+
+        } catch (NumberFormatException ex) {
+            if (e.getSource() != btnMostrar) {
                 JOptionPane.showMessageDialog(this, "El ID debe ser un número entero.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
             }
         }
+
+        if (e.getSource() == btnMostrar) {
+            if (listaUsuarios.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No hay usuarios registrados.");
+                return;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            for (Usuario u : listaUsuarios) {
+                sb.append("ID: ").append(u.getIdUsuario())
+                  .append(", Nombre: ").append(u.getNombre())
+                  .append(", Apellidos: ").append(u.getApellidos())
+                  .append(", Correo: ").append(u.getCorreo())
+                  .append(", Nivel: ").append(u.getNivelAcceso())
+                  .append("\n");
+            }
+
+            JTextArea area = new JTextArea(sb.toString());
+            area.setEditable(false);
+            JScrollPane scroll = new JScrollPane(area);
+            scroll.setPreferredSize(new Dimension(400, 200));
+            JOptionPane.showMessageDialog(this, scroll, "Lista de Usuarios", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void autocompletarDesdeID() {
+        String textoId = txtIdUsuario.getText().trim();
+        if (textoId.isEmpty()) {
+            limpiarCampos();
+            return;
+        }
+
+        try {
+            int id = Integer.parseInt(textoId);
+            for (Usuario u : listaUsuarios) {
+                if (u.getIdUsuario() == id) {
+                    txtNombre.setText(u.getNombre());
+                    txtApellidos.setText(u.getApellidos());
+                    txtCorreo.setText(u.getCorreo());
+                    txtPassword.setText(u.getPassword());
+                    cbNivelAcceso.setSelectedIndex(u.getNivelAcceso());
+                    return;
+                }
+            }
+            // Si no se encuentra, no limpia
+        } catch (NumberFormatException ex) {
+            limpiarCampos();
+        }
+    }
+
+    private void autocompletarDesdeNombre() {
+        String nombreIngresado = txtNombre.getText().trim();
+        if (nombreIngresado.isEmpty()) {
+            limpiarCampos();
+            return;
+        }
+
+        for (Usuario u : listaUsuarios) {
+            if (u.getNombre().equalsIgnoreCase(nombreIngresado)) {
+                txtIdUsuario.setText(String.valueOf(u.getIdUsuario()));
+                txtApellidos.setText(u.getApellidos());
+                txtCorreo.setText(u.getCorreo());
+                txtPassword.setText(u.getPassword());
+                cbNivelAcceso.setSelectedIndex(u.getNivelAcceso());
+                return;
+            }
+        }
+        // Si no se encuentra, no limpia
     }
 
     private void limpiarCampos() {
@@ -117,7 +306,6 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
         cbNivelAcceso.setSelectedIndex(0);
     }
 
-    // ✅ Agregar usuario ADMIN "Ronald" si no está en la lista
     private void agregarAdministradorFijo() {
         boolean existeAdmin = false;
         for (Usuario u : listaUsuarios) {
@@ -129,11 +317,10 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
         if (!existeAdmin) {
             Usuario admin = new Usuario(1, "Ronald", "Administrador", "admin@gmail.com", "12345", 0);
             listaUsuarios.add(admin);
-            guardarUsuariosEnArchivo(); // ✅ Guardar en archivo si no existía
+            guardarUsuariosEnArchivo();
         }
     }
 
-    // ✅ Guardar usuarios en el archivo
     private void guardarUsuariosEnArchivo() {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(ARCHIVO_USUARIOS))) {
             for (Usuario u : listaUsuarios) {
@@ -146,8 +333,8 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
         }
     }
 
-    // ✅ Cargar usuarios desde el archivo
     private void cargarUsuariosDesdeArchivo() {
+        listaUsuarios.clear(); // Evita duplicados
         try (BufferedReader br = new BufferedReader(new FileReader(ARCHIVO_USUARIOS))) {
             String linea;
             while ((linea = br.readLine()) != null) {
@@ -166,4 +353,5 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
             System.out.println("No se encontró el archivo de usuarios, se creará uno nuevo.");
         }
     }
+
 }

@@ -1,4 +1,3 @@
+1,Ronald,Feliz,admin@gmail.com,12345,0
 1,Ronald,Administrador,admin@gmail.com,12345,0
-1,Ronald,Administrador,admin@gmail.com,12345,0
-1,Luis,Perez,Luis@gmail.com,123,1
-2,Jhomer,Guzman,Jhomer@gmail.com,123,1
+2,Nayelis,Perez,Nayelis@gmail.com,123456,0

@@ -3,69 +3,167 @@ package Principal;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
 import java.util.ArrayList;
 
 public class FormularioEntrenadores extends JFrame implements ActionListener {
 
     private JTextField txtIdEntrenador, txtNombre, txtApellido, txtTelefono, txtCorreo;
     private JButton btnGuardar, btnMostrar;
+    private JLabel lblEstado;
 
-    // Lista de entrenadores
     public static ArrayList<Entrenador> listaEntrenadores = new ArrayList<>();
+    private static final String ARCHIVO_ENTRENADORES = "entrenadores.txt";
 
     public FormularioEntrenadores() {
         setTitle("Gestión de Entrenadores");
-        setSize(400, 350);
+        setSize(400, 450);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
+        cargarEntrenadoresDesdeArchivo();
+
         JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(new Color(10, 25, 49)); // Fondo azul oscuro
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 10, 5, 10);
 
-        gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.LINE_END;
-        panel.add(new JLabel("ID Entrenador:"), gbc);
-        gbc.gridx = 1; gbc.anchor = GridBagConstraints.LINE_START;
+        // Imagen superior (logo.png debe estar en la carpeta del proyecto)
+        ImageIcon icono = new ImageIcon("logo.png");
+        JLabel lblImagen = new JLabel(icono);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        panel.add(lblImagen, gbc);
+        
+        lblEstado = new JLabel(" ");
+        lblEstado.setForeground(Color.YELLOW);
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.NORTHEAST;
+        panel.add(lblEstado, gbc);
+
+
+        gbc.gridwidth = 1;
+        gbc.gridy++;
+        gbc.gridx = 0;
+        panel.add(crearLabel("ID Entrenador:"), gbc);
+        gbc.gridx = 1;
         txtIdEntrenador = new JTextField(15);
         panel.add(txtIdEntrenador, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.LINE_END;
-        panel.add(new JLabel("Nombre:"), gbc);
-        gbc.gridx = 1; gbc.anchor = GridBagConstraints.LINE_START;
+        gbc.gridy++;
+        gbc.gridx = 0;
+        panel.add(crearLabel("Nombre:"), gbc);
+        gbc.gridx = 1;
         txtNombre = new JTextField(15);
         panel.add(txtNombre, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2; gbc.anchor = GridBagConstraints.LINE_END;
-        panel.add(new JLabel("Apellido:"), gbc);
-        gbc.gridx = 1; gbc.anchor = GridBagConstraints.LINE_START;
+        gbc.gridy++;
+        gbc.gridx = 0;
+        panel.add(crearLabel("Apellido:"), gbc);
+        gbc.gridx = 1;
         txtApellido = new JTextField(15);
         panel.add(txtApellido, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 3; gbc.anchor = GridBagConstraints.LINE_END;
-        panel.add(new JLabel("Teléfono:"), gbc);
-        gbc.gridx = 1; gbc.anchor = GridBagConstraints.LINE_START;
+        gbc.gridy++;
+        gbc.gridx = 0;
+        panel.add(crearLabel("Teléfono:"), gbc);
+        gbc.gridx = 1;
         txtTelefono = new JTextField(15);
         panel.add(txtTelefono, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 4; gbc.anchor = GridBagConstraints.LINE_END;
-        panel.add(new JLabel("Correo Electrónico:"), gbc);
-        gbc.gridx = 1; gbc.anchor = GridBagConstraints.LINE_START;
+        gbc.gridy++;
+        gbc.gridx = 0;
+        panel.add(crearLabel("Correo Electrónico:"), gbc);
+        gbc.gridx = 1;
         txtCorreo = new JTextField(15);
         panel.add(txtCorreo, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 5; gbc.gridwidth = 2;
+        gbc.gridy++;
+        gbc.gridx = 0;
+        gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         btnGuardar = new JButton("Guardar");
+        btnGuardar.setBackground(new Color(255, 215, 0)); // Amarillo fuerte
+        btnGuardar.setForeground(Color.BLACK);
         btnGuardar.addActionListener(this);
         panel.add(btnGuardar, gbc);
 
-        gbc.gridy = 6;
+        gbc.gridy++;
         btnMostrar = new JButton("Mostrar Entrenadores");
+        btnMostrar.setBackground(new Color(255, 215, 0));
+        btnMostrar.setForeground(Color.BLACK);
         btnMostrar.addActionListener(this);
         panel.add(btnMostrar, gbc);
+        
+        
+
+        txtIdEntrenador.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                String textoId = txtIdEntrenador.getText().trim();
+                if (textoId.isEmpty()) {
+                    limpiarCampos();
+                    lblEstado.setText(" ");
+                    return;
+                }
+                try {
+                    int id = Integer.parseInt(textoId);
+                    boolean encontrado = false;
+                    for (Entrenador ent : listaEntrenadores) {
+                        if (ent.getIdEntrenador() == id) {
+                            txtNombre.setText(ent.getNombre());
+                            txtApellido.setText(ent.getApellido());
+                            txtTelefono.setText(ent.getTelefono());
+                            txtCorreo.setText(ent.getCorreo());
+                            lblEstado.setText("Modificando");
+                            encontrado = true;
+                            break;
+                        }
+                    }
+                    if (!encontrado) {
+                        txtNombre.setText("");
+                        txtApellido.setText("");
+                        txtTelefono.setText("");
+                        txtCorreo.setText("");
+                        lblEstado.setText("Creando");
+                    }
+                } catch (NumberFormatException ex) {
+                    lblEstado.setText(" ");
+                }
+            }
+        });
+
+
+
+        txtNombre.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                String nombreIngresado = txtNombre.getText().trim();
+                if (nombreIngresado.isEmpty()) {
+                    limpiarCampos();
+                    return;
+                }
+                for (Entrenador ent : listaEntrenadores) {
+                    if (ent.getNombre().equalsIgnoreCase(nombreIngresado)) {
+                        txtIdEntrenador.setText(String.valueOf(ent.getIdEntrenador()));
+                        txtApellido.setText(ent.getApellido());
+                        txtTelefono.setText(ent.getTelefono());
+                        txtCorreo.setText(ent.getCorreo());
+                        return;
+                    }
+                }
+            }
+        });
 
         add(panel);
         setVisible(true);
+    }
+
+    private JLabel crearLabel(String texto) {
+        JLabel label = new JLabel(texto);
+        label.setForeground(Color.WHITE);
+        return label;
     }
 
     @Override
@@ -83,7 +181,6 @@ public class FormularioEntrenadores extends JFrame implements ActionListener {
                     return;
                 }
 
-                // Verificar si el entrenador ya existe
                 for (Entrenador ent : listaEntrenadores) {
                     if (ent.getIdEntrenador() == idEntrenador) {
                         JOptionPane.showMessageDialog(this, "El ID de entrenador ya está registrado.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -91,8 +188,8 @@ public class FormularioEntrenadores extends JFrame implements ActionListener {
                     }
                 }
 
-                // Agregar entrenador a la lista
                 listaEntrenadores.add(new Entrenador(idEntrenador, nombre, apellido, telefono, correo));
+                guardarEntrenadoresEnArchivo();
                 JOptionPane.showMessageDialog(this, "Entrenador guardado exitosamente.");
                 limpiarCampos();
             } catch (NumberFormatException ex) {
@@ -119,12 +216,45 @@ public class FormularioEntrenadores extends JFrame implements ActionListener {
 
         StringBuilder lista = new StringBuilder("Entrenadores Registrados:\n");
         for (Entrenador ent : listaEntrenadores) {
-            lista.append("• ID: ").append(ent.getIdEntrenador())
+            lista.append("\u2022 ID: ").append(ent.getIdEntrenador())
                  .append(" - Nombre: ").append(ent.getNombre()).append(" ").append(ent.getApellido())
                  .append(" - Tel: ").append(ent.getTelefono())
                  .append(" - Correo: ").append(ent.getCorreo()).append("\n");
         }
 
         JOptionPane.showMessageDialog(this, lista.toString(), "Lista de Entrenadores", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void guardarEntrenadoresEnArchivo() {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(ARCHIVO_ENTRENADORES))) {
+            for (Entrenador ent : listaEntrenadores) {
+                bw.write(ent.getIdEntrenador() + "," + ent.getNombre() + "," + ent.getApellido() + "," +
+                         ent.getTelefono() + "," + ent.getCorreo());
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Error al guardar entrenadores.");
+        }
+    }
+
+    private void cargarEntrenadoresDesdeArchivo() {
+        listaEntrenadores.clear();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(ARCHIVO_ENTRENADORES))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                String[] datos = linea.split(",");
+                if (datos.length == 5) {
+                    int id = Integer.parseInt(datos[0]);
+                    String nombre = datos[1];
+                    String apellido = datos[2];
+                    String telefono = datos[3];
+                    String correo = datos[4];
+                    listaEntrenadores.add(new Entrenador(id, nombre, apellido, telefono, correo));
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("No se encontró el archivo de entrenadores, se creará uno nuevo.");
+        }
     }
 }
