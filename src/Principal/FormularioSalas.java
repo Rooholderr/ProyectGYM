@@ -29,7 +29,7 @@ public class FormularioSalas extends JFrame implements ActionListener {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 10, 5, 10);
         
-        // Mensaje justo encima del campo ID Sala
+
         lblEstado = new JLabel(" ");
         lblEstado.setForeground(Color.YELLOW);
         gbc.gridx = 1;
@@ -120,7 +120,7 @@ public class FormularioSalas extends JFrame implements ActionListener {
 
 
 
-    // Agregar el panel completo al frame
+
         add(panel);
 
 

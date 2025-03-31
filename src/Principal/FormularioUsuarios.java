@@ -11,7 +11,8 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
     private JTextField txtIdUsuario, txtNombre, txtApellidos, txtCorreo;
     private JPasswordField txtPassword;
     private JComboBox<String> cbNivelAcceso;
-    private JButton btnGuardar, btnMostrar, btnModificar, btnEliminar;
+    private JButton btnGuardar, btnMostrar, btnEliminar;
+    private JLabel lblEstado;
 
     public static ArrayList<Usuario> listaUsuarios = new ArrayList<>();
     private static final String ARCHIVO_USUARIOS = "usuarios.txt";
@@ -26,11 +27,20 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
         agregarAdministradorFijo();
 
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(new Color(15, 15, 30)); // Fondo oscuro moderno
+        panel.setBackground(new Color(15, 15, 30));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 10, 5, 10);
 
-        gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.LINE_END;
+       // Aprtado de letrero modificando o creando Ronald
+       
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.NORTHEAST;
+        lblEstado = new JLabel(" ");
+        lblEstado.setForeground(Color.YELLOW);
+        panel.add(lblEstado, gbc);
+        gbc.gridwidth = 1;
+
+        gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.LINE_END;
         JLabel lblId = new JLabel("ID Usuario:");
         lblId.setForeground(Color.WHITE);
         panel.add(lblId, gbc);
@@ -38,7 +48,7 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
         txtIdUsuario = new JTextField(15);
         panel.add(txtIdUsuario, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.LINE_END;
+        gbc.gridx = 0; gbc.gridy = 2; gbc.anchor = GridBagConstraints.LINE_END;
         JLabel lblNombre = new JLabel("Nombre:");
         lblNombre.setForeground(Color.WHITE);
         panel.add(lblNombre, gbc);
@@ -46,7 +56,7 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
         txtNombre = new JTextField(15);
         panel.add(txtNombre, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2; gbc.anchor = GridBagConstraints.LINE_END;
+        gbc.gridx = 0; gbc.gridy = 3; gbc.anchor = GridBagConstraints.LINE_END;
         JLabel lblApellidos = new JLabel("Apellidos:");
         lblApellidos.setForeground(Color.WHITE);
         panel.add(lblApellidos, gbc);
@@ -54,7 +64,7 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
         txtApellidos = new JTextField(15);
         panel.add(txtApellidos, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 3; gbc.anchor = GridBagConstraints.LINE_END;
+        gbc.gridx = 0; gbc.gridy = 4; gbc.anchor = GridBagConstraints.LINE_END;
         JLabel lblCorreo = new JLabel("Correo Electrónico:");
         lblCorreo.setForeground(Color.WHITE);
         panel.add(lblCorreo, gbc);
@@ -62,7 +72,7 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
         txtCorreo = new JTextField(15);
         panel.add(txtCorreo, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 4; gbc.anchor = GridBagConstraints.LINE_END;
+        gbc.gridx = 0; gbc.gridy = 5; gbc.anchor = GridBagConstraints.LINE_END;
         JLabel lblPassword = new JLabel("Contraseña:");
         lblPassword.setForeground(Color.WHITE);
         panel.add(lblPassword, gbc);
@@ -70,7 +80,7 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
         txtPassword = new JPasswordField(15);
         panel.add(txtPassword, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 5; gbc.anchor = GridBagConstraints.LINE_END;
+        gbc.gridx = 0; gbc.gridy = 6; gbc.anchor = GridBagConstraints.LINE_END;
         JLabel lblNivel = new JLabel("Nivel de Acceso:");
         lblNivel.setForeground(Color.WHITE);
         panel.add(lblNivel, gbc);
@@ -79,18 +89,15 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
         cbNivelAcceso = new JComboBox<>(niveles);
         panel.add(cbNivelAcceso, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 2;
+        gbc.gridx = 0; gbc.gridy = 7; gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
 
-        JPanel panelBotones = new JPanel(new GridLayout(1, 4, 5, 5));
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         panelBotones.setBackground(new Color(15, 15, 30));
 
         btnGuardar = new JButton("Guardar");
         btnGuardar.setBackground(new Color(255, 215, 0));
         btnGuardar.setForeground(Color.BLACK);
-        btnModificar = new JButton("Modificar");
-        btnModificar.setBackground(new Color(255, 215, 0));
-        btnModificar.setForeground(Color.BLACK);
         btnEliminar = new JButton("Eliminar");
         btnEliminar.setBackground(new Color(255, 215, 0));
         btnEliminar.setForeground(Color.BLACK);
@@ -99,12 +106,10 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
         btnMostrar.setForeground(Color.BLACK);
 
         btnGuardar.addActionListener(this);
-        btnModificar.addActionListener(this);
         btnEliminar.addActionListener(this);
         btnMostrar.addActionListener(this);
 
         panelBotones.add(btnGuardar);
-        panelBotones.add(btnModificar);
         panelBotones.add(btnEliminar);
         panelBotones.add(btnMostrar);
 
@@ -119,6 +124,7 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
                 }
                 try {
                     int id = Integer.parseInt(textoId);
+                    boolean encontrado = false;
                     for (Usuario u : listaUsuarios) {
                         if (u.getIdUsuario() == id) {
                             txtNombre.setText(u.getNombre());
@@ -126,31 +132,16 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
                             txtCorreo.setText(u.getCorreo());
                             txtPassword.setText(u.getPassword());
                             cbNivelAcceso.setSelectedIndex(u.getNivelAcceso());
+                            lblEstado.setText("Modificando");
+                            encontrado = true;
                             return;
                         }
                     }
-                } catch (NumberFormatException ex) {
-                    // No limpiar
-                }
-            }
-        });
-
-        txtNombre.addKeyListener(new KeyAdapter() {
-            public void keyReleased(KeyEvent e) {
-                String nombreIngresado = txtNombre.getText().trim();
-                if (nombreIngresado.isEmpty()) {
-                    limpiarCampos();
-                    return;
-                }
-                for (Usuario u : listaUsuarios) {
-                    if (u.getNombre().equalsIgnoreCase(nombreIngresado)) {
-                        txtIdUsuario.setText(String.valueOf(u.getIdUsuario()));
-                        txtApellidos.setText(u.getApellidos());
-                        txtCorreo.setText(u.getCorreo());
-                        txtPassword.setText(u.getPassword());
-                        cbNivelAcceso.setSelectedIndex(u.getNivelAcceso());
-                        return;
+                    if (!encontrado) {
+                        lblEstado.setText("Creando");
                     }
+                } catch (NumberFormatException ex) {
+                    limpiarCampos();
                 }
             }
         });
@@ -158,8 +149,6 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
         add(panel);
         setVisible(true);
     }
-    // Resto del código permanece igual
-
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -188,32 +177,14 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
                 Usuario nuevoUsuario = new Usuario(idUsuario, nombre, apellidos, correo, password, nivelAcceso);
                 listaUsuarios.add(nuevoUsuario);
                 guardarUsuariosEnArchivo();
+                lblEstado.setText("Creando...");
                 JOptionPane.showMessageDialog(this, "Usuario guardado exitosamente.");
                 limpiarCampos();
-            } else if (e.getSource() == btnModificar) {
-                boolean encontrado = false;
-                for (Usuario u : listaUsuarios) {
-                    if (u.getIdUsuario() == idUsuario) {
-                        u.setNombre(txtNombre.getText().trim());
-                        u.setApellidos(txtApellidos.getText().trim());
-                        u.setCorreo(txtCorreo.getText().trim());
-                        u.setPassword(new String(txtPassword.getPassword()).trim());
-                        u.setNivelAcceso(cbNivelAcceso.getSelectedIndex());
-                        encontrado = true;
-                        break;
-                    }
-                }
-                if (encontrado) {
-                    guardarUsuariosEnArchivo();
-                    JOptionPane.showMessageDialog(this, "Usuario modificado.");
-                    limpiarCampos();
-                } else {
-                    JOptionPane.showMessageDialog(this, "Usuario no encontrado.");
-                }
             } else if (e.getSource() == btnEliminar) {
                 boolean eliminado = listaUsuarios.removeIf(u -> u.getIdUsuario() == idUsuario && !u.getNombre().equalsIgnoreCase("Ronald"));
                 if (eliminado) {
                     guardarUsuariosEnArchivo();
+                    lblEstado.setText("Modificando...");
                     JOptionPane.showMessageDialog(this, "Usuario eliminado.");
                     limpiarCampos();
                 } else {
@@ -252,51 +223,6 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
         }
     }
 
-    private void autocompletarDesdeID() {
-        String textoId = txtIdUsuario.getText().trim();
-        if (textoId.isEmpty()) {
-            limpiarCampos();
-            return;
-        }
-
-        try {
-            int id = Integer.parseInt(textoId);
-            for (Usuario u : listaUsuarios) {
-                if (u.getIdUsuario() == id) {
-                    txtNombre.setText(u.getNombre());
-                    txtApellidos.setText(u.getApellidos());
-                    txtCorreo.setText(u.getCorreo());
-                    txtPassword.setText(u.getPassword());
-                    cbNivelAcceso.setSelectedIndex(u.getNivelAcceso());
-                    return;
-                }
-            }
-            // Si no se encuentra, no limpia
-        } catch (NumberFormatException ex) {
-            limpiarCampos();
-        }
-    }
-
-    private void autocompletarDesdeNombre() {
-        String nombreIngresado = txtNombre.getText().trim();
-        if (nombreIngresado.isEmpty()) {
-            limpiarCampos();
-            return;
-        }
-
-        for (Usuario u : listaUsuarios) {
-            if (u.getNombre().equalsIgnoreCase(nombreIngresado)) {
-                txtIdUsuario.setText(String.valueOf(u.getIdUsuario()));
-                txtApellidos.setText(u.getApellidos());
-                txtCorreo.setText(u.getCorreo());
-                txtPassword.setText(u.getPassword());
-                cbNivelAcceso.setSelectedIndex(u.getNivelAcceso());
-                return;
-            }
-        }
-        // Si no se encuentra, no limpia
-    }
-
     private void limpiarCampos() {
         txtIdUsuario.setText("");
         txtNombre.setText("");
@@ -304,6 +230,7 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
         txtCorreo.setText("");
         txtPassword.setText("");
         cbNivelAcceso.setSelectedIndex(0);
+        lblEstado.setText(" ");
     }
 
     private void agregarAdministradorFijo() {
@@ -334,7 +261,7 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
     }
 
     private void cargarUsuariosDesdeArchivo() {
-        listaUsuarios.clear(); // Evita duplicados
+        listaUsuarios.clear();
         try (BufferedReader br = new BufferedReader(new FileReader(ARCHIVO_USUARIOS))) {
             String linea;
             while ((linea = br.readLine()) != null) {
@@ -353,5 +280,4 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
             System.out.println("No se encontró el archivo de usuarios, se creará uno nuevo.");
         }
     }
-
 }

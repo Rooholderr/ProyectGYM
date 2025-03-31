@@ -28,7 +28,7 @@ public class Login extends JFrame implements ActionListener {
         setContentPane(contenedor);
 
         // Imagen superior (450 x 230)
-        ImageIcon iconoPesas = new ImageIcon(getClass().getResource("/Principal/GII.png")); // imagen
+        ImageIcon iconoPesas = new ImageIcon(getClass().getResource("/Principal/zone2.png")); // imagen
         Image imagen = iconoPesas.getImage().getScaledInstance(450, 230, Image.SCALE_SMOOTH);
         JLabel imagenArriba = new JLabel(new ImageIcon(imagen));
         imagenArriba.setBounds(0, 0, 450, 230);
