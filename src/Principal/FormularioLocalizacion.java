@@ -18,7 +18,7 @@ public class FormularioLocalizacion extends JFrame implements ActionListener {
 
     public FormularioLocalizacion() {
         setTitle("Gestión de Localización");
-        setSize(400, 300);
+        setSize(420, 350);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -28,52 +28,81 @@ public class FormularioLocalizacion extends JFrame implements ActionListener {
         panel.setBackground(new Color(10, 25, 49));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 10, 5, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.LINE_END;
-        JLabel lblId = new JLabel("ID Localización:");
-        lblId.setForeground(Color.WHITE);
-        panel.add(lblId, gbc);
-        
+        // Estado (Creando / Modificando) — ALINEADO A LA DERECHA
         lblEstado = new JLabel(" ");
         lblEstado.setForeground(Color.YELLOW);
         gbc.gridx = 1;
-        gbc.gridy = -1;
+        gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.NORTHEAST;
         panel.add(lblEstado, gbc);
 
+
+
+        // ID
+        gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.LINE_END;
+        JLabel lblId = new JLabel("ID Localización:");
+        lblId.setForeground(Color.WHITE);
+        panel.add(lblId, gbc);
         gbc.gridx = 1; gbc.anchor = GridBagConstraints.LINE_START;
         txtIdLocalizacion = new JTextField(15);
         panel.add(txtIdLocalizacion, gbc);
+        gbc.gridx = 2;
+        panel.add(Box.createHorizontalStrut(15), gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.LINE_END;
+        // Tipo
+        gbc.gridx = 0; gbc.gridy = 2; gbc.anchor = GridBagConstraints.LINE_END;
         JLabel lblTipo = new JLabel("Tipo:");
         lblTipo.setForeground(Color.WHITE);
         panel.add(lblTipo, gbc);
         gbc.gridx = 1; gbc.anchor = GridBagConstraints.LINE_START;
         txtTipo = new JTextField(15);
         panel.add(txtTipo, gbc);
+        gbc.gridx = 2;
+        panel.add(Box.createHorizontalStrut(15), gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2; gbc.anchor = GridBagConstraints.LINE_END;
+        // Descripción
+        gbc.gridx = 0; gbc.gridy = 3; gbc.anchor = GridBagConstraints.LINE_END;
         JLabel lblDescripcion = new JLabel("Descripción:");
         lblDescripcion.setForeground(Color.WHITE);
         panel.add(lblDescripcion, gbc);
         gbc.gridx = 1; gbc.anchor = GridBagConstraints.LINE_START;
         txtDescripcion = new JTextField(15);
         panel.add(txtDescripcion, gbc);
+        gbc.gridx = 2;
+        panel.add(Box.createHorizontalStrut(15), gbc);
 
-        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 2; gbc.anchor = GridBagConstraints.CENTER;
+        // Panel interno para botones
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+
+        JPanel panelBotones = new JPanel();
+        panelBotones.setBackground(new Color(10, 25, 49)); // mismo fondo
         btnGuardar = new JButton("Guardar");
         btnGuardar.setBackground(new Color(255, 215, 0));
         btnGuardar.setForeground(Color.BLACK);
         btnGuardar.addActionListener(this);
-        panel.add(btnGuardar, gbc);
+        panelBotones.add(btnGuardar);
 
-        gbc.gridy = 4;
+        gbc.insets = new Insets(10, 10, 5, 10);
+        panel.add(panelBotones, gbc);
+
+        // Segundo botón en panel separado
+        gbc.gridy = 5;
+        JPanel panelMostrar = new JPanel();
+        panelMostrar.setBackground(new Color(10, 25, 49)); // mismo fondo
         btnMostrar = new JButton("Mostrar Localizaciones");
         btnMostrar.setBackground(new Color(255, 215, 0));
         btnMostrar.setForeground(Color.BLACK);
         btnMostrar.addActionListener(this);
-        panel.add(btnMostrar, gbc);
+        panelMostrar.add(btnMostrar);
+
+        gbc.insets = new Insets(0, 10, 10, 10);
+        panel.add(panelMostrar, gbc);
+
         
         txtIdLocalizacion.addKeyListener(new KeyAdapter() {
         public void keyReleased(KeyEvent e) {

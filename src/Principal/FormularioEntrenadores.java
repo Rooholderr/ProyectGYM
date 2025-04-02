@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class FormularioEntrenadores extends JFrame implements ActionListener {
 
     private JTextField txtIdEntrenador, txtNombre, txtApellido, txtTelefono, txtCorreo;
-    private JButton btnGuardar, btnMostrar;
+    private JButton btnGuardar, btnMostrar, btnModificar;
     private JLabel lblEstado;
 
     public static ArrayList<Entrenador> listaEntrenadores = new ArrayList<>();
@@ -17,18 +17,18 @@ public class FormularioEntrenadores extends JFrame implements ActionListener {
 
     public FormularioEntrenadores() {
         setTitle("Gestión de Entrenadores");
-        setSize(400, 450);
+        setSize(450, 500);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         cargarEntrenadoresDesdeArchivo();
 
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(new Color(10, 25, 49)); // Fondo azul oscuro
+        panel.setBackground(new Color(10, 25, 49));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 10, 5, 10);
 
-        // Imagen superior (logo.png debe estar en la carpeta del proyecto)
+        // Imagen superior
         ImageIcon icono = new ImageIcon("logo.png");
         JLabel lblImagen = new JLabel(icono);
         gbc.gridx = 0;
@@ -36,7 +36,8 @@ public class FormularioEntrenadores extends JFrame implements ActionListener {
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         panel.add(lblImagen, gbc);
-        
+
+        // Estado
         lblEstado = new JLabel(" ");
         lblEstado.setForeground(Color.YELLOW);
         gbc.gridx = 1;
@@ -44,62 +45,84 @@ public class FormularioEntrenadores extends JFrame implements ActionListener {
         gbc.anchor = GridBagConstraints.NORTHEAST;
         panel.add(lblEstado, gbc);
 
-
         gbc.gridwidth = 1;
+
+        // Campo ID
         gbc.gridy++;
         gbc.gridx = 0;
         panel.add(crearLabel("ID Entrenador:"), gbc);
         gbc.gridx = 1;
-        txtIdEntrenador = new JTextField(15);
+        txtIdEntrenador = new JTextField();
+        txtIdEntrenador.setPreferredSize(new Dimension(200, 25));
         panel.add(txtIdEntrenador, gbc);
 
+        // Campo Nombre
         gbc.gridy++;
         gbc.gridx = 0;
         panel.add(crearLabel("Nombre:"), gbc);
         gbc.gridx = 1;
-        txtNombre = new JTextField(15);
+        txtNombre = new JTextField();
+        txtNombre.setPreferredSize(new Dimension(200, 25));
         panel.add(txtNombre, gbc);
 
+        // Campo Apellido
         gbc.gridy++;
         gbc.gridx = 0;
         panel.add(crearLabel("Apellido:"), gbc);
         gbc.gridx = 1;
-        txtApellido = new JTextField(15);
+        txtApellido = new JTextField();
+        txtApellido.setPreferredSize(new Dimension(200, 25));
         panel.add(txtApellido, gbc);
 
+        // Campo Teléfono
         gbc.gridy++;
         gbc.gridx = 0;
         panel.add(crearLabel("Teléfono:"), gbc);
         gbc.gridx = 1;
-        txtTelefono = new JTextField(15);
+        txtTelefono = new JTextField();
+        txtTelefono.setPreferredSize(new Dimension(200, 25));
         panel.add(txtTelefono, gbc);
 
+        // Campo Correo
         gbc.gridy++;
         gbc.gridx = 0;
         panel.add(crearLabel("Correo Electrónico:"), gbc);
         gbc.gridx = 1;
-        txtCorreo = new JTextField(15);
+        txtCorreo = new JTextField();
+        txtCorreo.setPreferredSize(new Dimension(200, 25));
         panel.add(txtCorreo, gbc);
 
+        // Panel de botones horizontal
         gbc.gridy++;
         gbc.gridx = 0;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
+
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        panelBotones.setBackground(new Color(10, 25, 49));
+
         btnGuardar = new JButton("Guardar");
-        btnGuardar.setBackground(new Color(255, 215, 0)); // Amarillo fuerte
+        btnGuardar.setBackground(new Color(255, 215, 0));
         btnGuardar.setForeground(Color.BLACK);
         btnGuardar.addActionListener(this);
-        panel.add(btnGuardar, gbc);
 
-        gbc.gridy++;
+        btnModificar = new JButton("Modificar");
+        btnModificar.setBackground(new Color(255, 215, 0));
+        btnModificar.setForeground(Color.BLACK);
+        btnModificar.addActionListener(this);
+
         btnMostrar = new JButton("Mostrar Entrenadores");
         btnMostrar.setBackground(new Color(255, 215, 0));
         btnMostrar.setForeground(Color.BLACK);
         btnMostrar.addActionListener(this);
-        panel.add(btnMostrar, gbc);
-        
-        
 
+        panelBotones.add(btnGuardar);
+        panelBotones.add(btnModificar);
+        panelBotones.add(btnMostrar);
+
+        panel.add(panelBotones, gbc);
+
+        // Eventos de teclado
         txtIdEntrenador.addKeyListener(new KeyAdapter() {
             public void keyReleased(KeyEvent e) {
                 String textoId = txtIdEntrenador.getText().trim();
@@ -123,10 +146,8 @@ public class FormularioEntrenadores extends JFrame implements ActionListener {
                         }
                     }
                     if (!encontrado) {
-                        txtNombre.setText("");
-                        txtApellido.setText("");
-                        txtTelefono.setText("");
-                        txtCorreo.setText("");
+                        limpiarCampos();
+                        txtIdEntrenador.setText(textoId);
                         lblEstado.setText("Creando");
                     }
                 } catch (NumberFormatException ex) {
@@ -134,8 +155,6 @@ public class FormularioEntrenadores extends JFrame implements ActionListener {
                 }
             }
         });
-
-
 
         txtNombre.addKeyListener(new KeyAdapter() {
             public void keyReleased(KeyEvent e) {
@@ -150,6 +169,7 @@ public class FormularioEntrenadores extends JFrame implements ActionListener {
                         txtApellido.setText(ent.getApellido());
                         txtTelefono.setText(ent.getTelefono());
                         txtCorreo.setText(ent.getCorreo());
+                        lblEstado.setText("Modificando");
                         return;
                     }
                 }
@@ -195,6 +215,40 @@ public class FormularioEntrenadores extends JFrame implements ActionListener {
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "El ID debe ser un número entero.", "Error", JOptionPane.ERROR_MESSAGE);
             }
+
+        } else if (e.getSource() == btnModificar) {
+            try {
+                int idEntrenador = Integer.parseInt(txtIdEntrenador.getText().trim());
+                String nombre = txtNombre.getText().trim();
+                String apellido = txtApellido.getText().trim();
+                String telefono = txtTelefono.getText().trim();
+                String correo = txtCorreo.getText().trim();
+
+                boolean encontrado = false;
+                for (Entrenador ent : listaEntrenadores) {
+                    if (ent.getIdEntrenador() == idEntrenador) {
+                        ent.setNombre(nombre);
+                        ent.setApellido(apellido);
+                        ent.setTelefono(telefono);
+                        ent.setCorreo(correo);
+                        encontrado = true;
+                        break;
+                    }
+                }
+
+                if (encontrado) {
+                    guardarEntrenadoresEnArchivo();
+                    JOptionPane.showMessageDialog(this, "Entrenador modificado exitosamente.");
+                    limpiarCampos();
+                    lblEstado.setText(" ");
+                } else {
+                    JOptionPane.showMessageDialog(this, "No se encontró el entrenador con ese ID.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "El ID debe ser un número entero.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
         } else if (e.getSource() == btnMostrar) {
             mostrarEntrenadores();
         }
@@ -206,6 +260,7 @@ public class FormularioEntrenadores extends JFrame implements ActionListener {
         txtApellido.setText("");
         txtTelefono.setText("");
         txtCorreo.setText("");
+        lblEstado.setText(" ");
     }
 
     private void mostrarEntrenadores() {

@@ -11,7 +11,7 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
     private JTextField txtIdUsuario, txtNombre, txtApellidos, txtCorreo;
     private JPasswordField txtPassword;
     private JComboBox<String> cbNivelAcceso;
-    private JButton btnGuardar, btnMostrar, btnEliminar;
+    private JButton btnGuardar, btnMostrar, btnEliminar, btnModificar;
     private JLabel lblEstado;
 
     public static ArrayList<Usuario> listaUsuarios = new ArrayList<>();
@@ -31,8 +31,7 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 10, 5, 10);
 
-       // Aprtado de letrero modificando o creando Ronald
-       
+        // Letrero de estado (Creando / Modificando)
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.NORTHEAST;
         lblEstado = new JLabel(" ");
@@ -98,18 +97,26 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
         btnGuardar = new JButton("Guardar");
         btnGuardar.setBackground(new Color(255, 215, 0));
         btnGuardar.setForeground(Color.BLACK);
+
+        btnModificar = new JButton("Modificar");
+        btnModificar.setBackground(new Color(255, 215, 0));
+        btnModificar.setForeground(Color.BLACK);
+
         btnEliminar = new JButton("Eliminar");
         btnEliminar.setBackground(new Color(255, 215, 0));
         btnEliminar.setForeground(Color.BLACK);
+
         btnMostrar = new JButton("Mostrar");
         btnMostrar.setBackground(new Color(255, 215, 0));
         btnMostrar.setForeground(Color.BLACK);
 
         btnGuardar.addActionListener(this);
+        btnModificar.addActionListener(this);
         btnEliminar.addActionListener(this);
         btnMostrar.addActionListener(this);
 
         panelBotones.add(btnGuardar);
+        panelBotones.add(btnModificar);
         panelBotones.add(btnEliminar);
         panelBotones.add(btnMostrar);
 
@@ -180,6 +187,39 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
                 lblEstado.setText("Creando...");
                 JOptionPane.showMessageDialog(this, "Usuario guardado exitosamente.");
                 limpiarCampos();
+            } else if (e.getSource() == btnModificar) {
+                String nombre = txtNombre.getText().trim();
+                String apellidos = txtApellidos.getText().trim();
+                String correo = txtCorreo.getText().trim();
+                String password = new String(txtPassword.getPassword()).trim();
+                int nivelAcceso = cbNivelAcceso.getSelectedIndex();
+
+                if (nombre.isEmpty() || apellidos.isEmpty() || correo.isEmpty() || password.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                boolean encontrado = false;
+                for (Usuario u : listaUsuarios) {
+                    if (u.getIdUsuario() == idUsuario) {
+                        u.setNombre(nombre);
+                        u.setApellidos(apellidos);
+                        u.setCorreo(correo);
+                        u.setPassword(password);
+                        u.setNivelAcceso(nivelAcceso);
+                        encontrado = true;
+                        break;
+                    }
+                }
+
+                if (encontrado) {
+                    guardarUsuariosEnArchivo();
+                    lblEstado.setText("Modificando...");
+                    JOptionPane.showMessageDialog(this, "Usuario modificado exitosamente.");
+                    limpiarCampos();
+                } else {
+                    JOptionPane.showMessageDialog(this, "No se encontró un usuario con ese ID.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             } else if (e.getSource() == btnEliminar) {
                 boolean eliminado = listaUsuarios.removeIf(u -> u.getIdUsuario() == idUsuario && !u.getNombre().equalsIgnoreCase("Ronald"));
                 if (eliminado) {
