@@ -11,7 +11,7 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
     private JTextField txtIdUsuario, txtNombre, txtApellidos, txtCorreo;
     private JPasswordField txtPassword;
     private JComboBox<String> cbNivelAcceso;
-    private JButton btnGuardar, btnMostrar, btnEliminar, btnModificar;
+    private JButton btnGuardar, btnEliminar, btnLimpiar;
     private JLabel lblEstado;
 
     public static ArrayList<Usuario> listaUsuarios = new ArrayList<>();
@@ -23,6 +23,14 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
+        // Mostrar MenuPrincipal al cerrar
+        addWindowListener(new WindowAdapter() {
+    @Override
+    public void windowClosed(WindowEvent e) {
+        setVisible(false); // oculta esta ventana
+    }
+});
+
         cargarUsuariosDesdeArchivo();
         agregarAdministradorFijo();
 
@@ -31,7 +39,6 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 10, 5, 10);
 
-        // Letrero de estado (Creando / Modificando)
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.NORTHEAST;
         lblEstado = new JLabel(" ");
@@ -97,61 +104,78 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
         btnGuardar = new JButton("Guardar");
         btnGuardar.setBackground(new Color(255, 215, 0));
         btnGuardar.setForeground(Color.BLACK);
-
-        btnModificar = new JButton("Modificar");
-        btnModificar.setBackground(new Color(255, 215, 0));
-        btnModificar.setForeground(Color.BLACK);
-
         btnEliminar = new JButton("Eliminar");
         btnEliminar.setBackground(new Color(255, 215, 0));
         btnEliminar.setForeground(Color.BLACK);
-
-        btnMostrar = new JButton("Mostrar");
-        btnMostrar.setBackground(new Color(255, 215, 0));
-        btnMostrar.setForeground(Color.BLACK);
+        btnLimpiar = new JButton("Limpiar");
+        btnLimpiar.setBackground(new Color(255, 215, 0));
+        btnLimpiar.setForeground(Color.BLACK);
 
         btnGuardar.addActionListener(this);
-        btnModificar.addActionListener(this);
         btnEliminar.addActionListener(this);
-        btnMostrar.addActionListener(this);
+        btnLimpiar.addActionListener(this);
 
         panelBotones.add(btnGuardar);
-        panelBotones.add(btnModificar);
         panelBotones.add(btnEliminar);
-        panelBotones.add(btnMostrar);
+        panelBotones.add(btnLimpiar);
 
         panel.add(panelBotones, gbc);
 
         txtIdUsuario.addKeyListener(new KeyAdapter() {
-            public void keyReleased(KeyEvent e) {
-                String textoId = txtIdUsuario.getText().trim();
-                if (textoId.isEmpty()) {
-                    limpiarCampos();
-                    return;
-                }
-                try {
-                    int id = Integer.parseInt(textoId);
-                    boolean encontrado = false;
-                    for (Usuario u : listaUsuarios) {
-                        if (u.getIdUsuario() == id) {
-                            txtNombre.setText(u.getNombre());
-                            txtApellidos.setText(u.getApellidos());
-                            txtCorreo.setText(u.getCorreo());
-                            txtPassword.setText(u.getPassword());
-                            cbNivelAcceso.setSelectedIndex(u.getNivelAcceso());
-                            lblEstado.setText("Modificando");
-                            encontrado = true;
-                            return;
-                        }
-                    }
-                    if (!encontrado) {
-                        lblEstado.setText("Creando");
-                    }
-                } catch (NumberFormatException ex) {
-                    limpiarCampos();
+    @Override
+    public void keyReleased(KeyEvent e) {
+        String textoId = txtIdUsuario.getText().trim();
+        if (textoId.isEmpty()) {
+            lblEstado.setText(" ");
+            return;
+        }
+        try {
+            int id = Integer.parseInt(textoId);
+            boolean encontrado = false;
+            for (Usuario u : listaUsuarios) {
+                if (u.getIdUsuario() == id) {
+                    lblEstado.setText("Modificando");
+                    encontrado = true;
+                    break;
                 }
             }
-        });
+            if (!encontrado) {
+                lblEstado.setText("Creando");
+            }
+        } catch (NumberFormatException ex) {
+            lblEstado.setText(" ");
+        }
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+            String textoId = txtIdUsuario.getText().trim();
+            if (textoId.isEmpty()) return;
+            try {
+                int id = Integer.parseInt(textoId);
+                boolean encontrado = false;
+                for (Usuario u : listaUsuarios) {
+                    if (u.getIdUsuario() == id) {
+                        txtNombre.setText(u.getNombre());
+                        txtApellidos.setText(u.getApellidos());
+                        txtCorreo.setText(u.getCorreo());
+                        txtPassword.setText(u.getPassword());
+                        cbNivelAcceso.setSelectedIndex(u.getNivelAcceso());
+                        encontrado = true;
+                        break;
+                    }
+                }
+                if (!encontrado) {
+                    limpiarCampos();
+                    txtIdUsuario.setText(textoId);
+                }
+            } catch (NumberFormatException ex) {
+                limpiarCampos();
+            }
+        }
+    }
+});
 
         add(panel);
         setVisible(true);
@@ -163,13 +187,6 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
             int idUsuario = Integer.parseInt(txtIdUsuario.getText().trim());
 
             if (e.getSource() == btnGuardar) {
-                for (Usuario u : listaUsuarios) {
-                    if (u.getIdUsuario() == idUsuario) {
-                        JOptionPane.showMessageDialog(this, "Ya existe un usuario con este ID.", "Error", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                }
-
                 String nombre = txtNombre.getText().trim();
                 String apellidos = txtApellidos.getText().trim();
                 String correo = txtCorreo.getText().trim();
@@ -181,46 +198,33 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
                     return;
                 }
 
-                Usuario nuevoUsuario = new Usuario(idUsuario, nombre, apellidos, correo, password, nivelAcceso);
-                listaUsuarios.add(nuevoUsuario);
-                guardarUsuariosEnArchivo();
-                lblEstado.setText("Creando...");
-                JOptionPane.showMessageDialog(this, "Usuario guardado exitosamente.");
-                limpiarCampos();
-            } else if (e.getSource() == btnModificar) {
-                String nombre = txtNombre.getText().trim();
-                String apellidos = txtApellidos.getText().trim();
-                String correo = txtCorreo.getText().trim();
-                String password = new String(txtPassword.getPassword()).trim();
-                int nivelAcceso = cbNivelAcceso.getSelectedIndex();
-
-                if (nombre.isEmpty() || apellidos.isEmpty() || correo.isEmpty() || password.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                boolean encontrado = false;
-                for (Usuario u : listaUsuarios) {
+                boolean existe = false;
+                for (int i = 0; i < listaUsuarios.size(); i++) {
+                    Usuario u = listaUsuarios.get(i);
                     if (u.getIdUsuario() == idUsuario) {
                         u.setNombre(nombre);
                         u.setApellidos(apellidos);
                         u.setCorreo(correo);
                         u.setPassword(password);
                         u.setNivelAcceso(nivelAcceso);
-                        encontrado = true;
+                        existe = true;
                         break;
                     }
                 }
 
-                if (encontrado) {
-                    guardarUsuariosEnArchivo();
-                    lblEstado.setText("Modificando...");
-                    JOptionPane.showMessageDialog(this, "Usuario modificado exitosamente.");
-                    limpiarCampos();
+                if (!existe) {
+                    Usuario nuevoUsuario = new Usuario(idUsuario, nombre, apellidos, correo, password, nivelAcceso);
+                    listaUsuarios.add(nuevoUsuario);
+                    JOptionPane.showMessageDialog(this, "Usuario guardado exitosamente.");
                 } else {
-                    JOptionPane.showMessageDialog(this, "No se encontró un usuario con ese ID.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Usuario modificado exitosamente.");
                 }
-            } else if (e.getSource() == btnEliminar) {
+
+                guardarUsuariosEnArchivo();
+                limpiarCampos();
+            }
+
+            if (e.getSource() == btnEliminar) {
                 boolean eliminado = listaUsuarios.removeIf(u -> u.getIdUsuario() == idUsuario && !u.getNombre().equalsIgnoreCase("Ronald"));
                 if (eliminado) {
                     guardarUsuariosEnArchivo();
@@ -232,46 +236,24 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
                 }
             }
 
+            if (e.getSource() == btnLimpiar) {
+                limpiarCampos();
+            }
+
         } catch (NumberFormatException ex) {
-            if (e.getSource() != btnMostrar) {
-                JOptionPane.showMessageDialog(this, "El ID debe ser un número entero.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-        }
-
-        if (e.getSource() == btnMostrar) {
-            if (listaUsuarios.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "No hay usuarios registrados.");
-                return;
-            }
-
-            StringBuilder sb = new StringBuilder();
-            for (Usuario u : listaUsuarios) {
-                sb.append("ID: ").append(u.getIdUsuario())
-                  .append(", Nombre: ").append(u.getNombre())
-                  .append(", Apellidos: ").append(u.getApellidos())
-                  .append(", Correo: ").append(u.getCorreo())
-                  .append(", Nivel: ").append(u.getNivelAcceso())
-                  .append("\n");
-            }
-
-            JTextArea area = new JTextArea(sb.toString());
-            area.setEditable(false);
-            JScrollPane scroll = new JScrollPane(area);
-            scroll.setPreferredSize(new Dimension(400, 200));
-            JOptionPane.showMessageDialog(this, scroll, "Lista de Usuarios", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "El ID debe ser un número entero.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void limpiarCampos() {
-        txtIdUsuario.setText("");
-        txtNombre.setText("");
-        txtApellidos.setText("");
-        txtCorreo.setText("");
-        txtPassword.setText("");
-        cbNivelAcceso.setSelectedIndex(0);
-        lblEstado.setText(" ");
-    }
+    txtIdUsuario.setText("");
+    txtNombre.setText("");
+    txtApellidos.setText("");
+    txtCorreo.setText("");
+    txtPassword.setText("");
+    cbNivelAcceso.setSelectedIndex(0);
+    lblEstado.setText(" ");
+}
 
     private void agregarAdministradorFijo() {
         boolean existeAdmin = false;
