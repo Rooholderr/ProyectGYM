@@ -23,13 +23,12 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        // Mostrar MenuPrincipal al cerrar
         addWindowListener(new WindowAdapter() {
-    @Override
-    public void windowClosed(WindowEvent e) {
-        setVisible(false); // oculta esta ventana
-    }
-});
+            @Override
+            public void windowClosed(WindowEvent e) {
+                setVisible(false);
+            }
+        });
 
         cargarUsuariosDesdeArchivo();
         agregarAdministradorFijo();
@@ -121,61 +120,40 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
 
         panel.add(panelBotones, gbc);
 
+        // SOLO AL PRESIONAR ENTER
         txtIdUsuario.addKeyListener(new KeyAdapter() {
-    @Override
-    public void keyReleased(KeyEvent e) {
-        String textoId = txtIdUsuario.getText().trim();
-        if (textoId.isEmpty()) {
-            lblEstado.setText(" ");
-            return;
-        }
-        try {
-            int id = Integer.parseInt(textoId);
-            boolean encontrado = false;
-            for (Usuario u : listaUsuarios) {
-                if (u.getIdUsuario() == id) {
-                    lblEstado.setText("Modificando");
-                    encontrado = true;
-                    break;
-                }
-            }
-            if (!encontrado) {
-                lblEstado.setText("Creando");
-            }
-        } catch (NumberFormatException ex) {
-            lblEstado.setText(" ");
-        }
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            String textoId = txtIdUsuario.getText().trim();
-            if (textoId.isEmpty()) return;
-            try {
-                int id = Integer.parseInt(textoId);
-                boolean encontrado = false;
-                for (Usuario u : listaUsuarios) {
-                    if (u.getIdUsuario() == id) {
-                        txtNombre.setText(u.getNombre());
-                        txtApellidos.setText(u.getApellidos());
-                        txtCorreo.setText(u.getCorreo());
-                        txtPassword.setText(u.getPassword());
-                        cbNivelAcceso.setSelectedIndex(u.getNivelAcceso());
-                        encontrado = true;
-                        break;
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    String textoId = txtIdUsuario.getText().trim();
+                    if (textoId.isEmpty()) return;
+                    try {
+                        int id = Integer.parseInt(textoId);
+                        boolean encontrado = false;
+                        for (Usuario u : listaUsuarios) {
+                            if (u.getIdUsuario() == id) {
+                                txtNombre.setText(u.getNombre());
+                                txtApellidos.setText(u.getApellidos());
+                                txtCorreo.setText(u.getCorreo());
+                                txtPassword.setText(u.getPassword());
+                                cbNivelAcceso.setSelectedIndex(u.getNivelAcceso());
+                                lblEstado.setText("Modificando");
+                                encontrado = true;
+                                break;
+                            }
+                        }
+                        if (!encontrado) {
+                            limpiarCampos();
+                            txtIdUsuario.setText(textoId);
+                            lblEstado.setText("Creando");
+                        }
+                    } catch (NumberFormatException ex) {
+                        limpiarCampos();
+                        lblEstado.setText(" ");
                     }
                 }
-                if (!encontrado) {
-                    limpiarCampos();
-                    txtIdUsuario.setText(textoId);
-                }
-            } catch (NumberFormatException ex) {
-                limpiarCampos();
             }
-        }
-    }
-});
+        });
 
         add(panel);
         setVisible(true);
@@ -246,14 +224,14 @@ public class FormularioUsuarios extends JFrame implements ActionListener {
     }
 
     private void limpiarCampos() {
-    txtIdUsuario.setText("");
-    txtNombre.setText("");
-    txtApellidos.setText("");
-    txtCorreo.setText("");
-    txtPassword.setText("");
-    cbNivelAcceso.setSelectedIndex(0);
-    lblEstado.setText(" ");
-}
+        txtIdUsuario.setText("");
+        txtNombre.setText("");
+        txtApellidos.setText("");
+        txtCorreo.setText("");
+        txtPassword.setText("");
+        cbNivelAcceso.setSelectedIndex(0);
+        lblEstado.setText(" ");
+    }
 
     private void agregarAdministradorFijo() {
         boolean existeAdmin = false;

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class FormularioEntrenadores extends JFrame implements ActionListener {
 
     private JTextField txtIdEntrenador, txtNombre, txtApellido, txtTelefono, txtCorreo;
-    private JButton btnGuardar, btnMostrar, btnModificar;
+    private JButton btnGuardar, btnEliminar, btnLimpiar;
     private JLabel lblEstado;
 
     public static ArrayList<Entrenador> listaEntrenadores = new ArrayList<>();
@@ -92,7 +92,7 @@ public class FormularioEntrenadores extends JFrame implements ActionListener {
         txtCorreo.setPreferredSize(new Dimension(200, 25));
         panel.add(txtCorreo, gbc);
 
-        // Panel de botones horizontal
+        // Panel de botones
         gbc.gridy++;
         gbc.gridx = 0;
         gbc.gridwidth = 2;
@@ -106,71 +106,51 @@ public class FormularioEntrenadores extends JFrame implements ActionListener {
         btnGuardar.setForeground(Color.BLACK);
         btnGuardar.addActionListener(this);
 
-        btnModificar = new JButton("Modificar");
-        btnModificar.setBackground(new Color(255, 215, 0));
-        btnModificar.setForeground(Color.BLACK);
-        btnModificar.addActionListener(this);
+        btnEliminar = new JButton("Eliminar");
+        btnEliminar.setBackground(new Color(255, 215, 0));
+        btnEliminar.setForeground(Color.BLACK);
+        btnEliminar.addActionListener(this);
 
-        btnMostrar = new JButton("Mostrar Entrenadores");
-        btnMostrar.setBackground(new Color(255, 215, 0));
-        btnMostrar.setForeground(Color.BLACK);
-        btnMostrar.addActionListener(this);
+        btnLimpiar = new JButton("Limpiar");
+        btnLimpiar.setBackground(new Color(255, 215, 0));
+        btnLimpiar.setForeground(Color.BLACK);
+        btnLimpiar.addActionListener(this);
 
         panelBotones.add(btnGuardar);
-        panelBotones.add(btnModificar);
-        panelBotones.add(btnMostrar);
+        panelBotones.add(btnEliminar);
+        panelBotones.add(btnLimpiar);
 
         panel.add(panelBotones, gbc);
 
-        // Eventos de teclado
+        // Evento ENTER en campo ID
         txtIdEntrenador.addKeyListener(new KeyAdapter() {
-            public void keyReleased(KeyEvent e) {
-                String textoId = txtIdEntrenador.getText().trim();
-                if (textoId.isEmpty()) {
-                    limpiarCampos();
-                    lblEstado.setText(" ");
-                    return;
-                }
-                try {
-                    int id = Integer.parseInt(textoId);
-                    boolean encontrado = false;
-                    for (Entrenador ent : listaEntrenadores) {
-                        if (ent.getIdEntrenador() == id) {
-                            txtNombre.setText(ent.getNombre());
-                            txtApellido.setText(ent.getApellido());
-                            txtTelefono.setText(ent.getTelefono());
-                            txtCorreo.setText(ent.getCorreo());
-                            lblEstado.setText("Modificando");
-                            encontrado = true;
-                            break;
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    String textoId = txtIdEntrenador.getText().trim();
+                    if (textoId.isEmpty()) return;
+                    try {
+                        int id = Integer.parseInt(textoId);
+                        boolean encontrado = false;
+                        for (Entrenador ent : listaEntrenadores) {
+                            if (ent.getIdEntrenador() == id) {
+                                txtNombre.setText(ent.getNombre());
+                                txtApellido.setText(ent.getApellido());
+                                txtTelefono.setText(ent.getTelefono());
+                                txtCorreo.setText(ent.getCorreo());
+                                lblEstado.setText("Modificando");
+                                encontrado = true;
+                                break;
+                            }
                         }
-                    }
-                    if (!encontrado) {
+                        if (!encontrado) {
+                            limpiarCampos();
+                            txtIdEntrenador.setText(textoId);
+                            lblEstado.setText("Creando");
+                        }
+                    } catch (NumberFormatException ex) {
                         limpiarCampos();
-                        txtIdEntrenador.setText(textoId);
-                        lblEstado.setText("Creando");
-                    }
-                } catch (NumberFormatException ex) {
-                    lblEstado.setText(" ");
-                }
-            }
-        });
-
-        txtNombre.addKeyListener(new KeyAdapter() {
-            public void keyReleased(KeyEvent e) {
-                String nombreIngresado = txtNombre.getText().trim();
-                if (nombreIngresado.isEmpty()) {
-                    limpiarCampos();
-                    return;
-                }
-                for (Entrenador ent : listaEntrenadores) {
-                    if (ent.getNombre().equalsIgnoreCase(nombreIngresado)) {
-                        txtIdEntrenador.setText(String.valueOf(ent.getIdEntrenador()));
-                        txtApellido.setText(ent.getApellido());
-                        txtTelefono.setText(ent.getTelefono());
-                        txtCorreo.setText(ent.getCorreo());
-                        lblEstado.setText("Modificando");
-                        return;
+                        lblEstado.setText(" ");
                     }
                 }
             }
@@ -188,69 +168,59 @@ public class FormularioEntrenadores extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == btnGuardar) {
-            try {
-                int idEntrenador = Integer.parseInt(txtIdEntrenador.getText().trim());
-                String nombre = txtNombre.getText().trim();
-                String apellido = txtApellido.getText().trim();
-                String telefono = txtTelefono.getText().trim();
-                String correo = txtCorreo.getText().trim();
+        try {
+            int idEntrenador = Integer.parseInt(txtIdEntrenador.getText().trim());
+            String nombre = txtNombre.getText().trim();
+            String apellido = txtApellido.getText().trim();
+            String telefono = txtTelefono.getText().trim();
+            String correo = txtCorreo.getText().trim();
 
-                if (nombre.isEmpty() || apellido.isEmpty() || telefono.isEmpty() || correo.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                for (Entrenador ent : listaEntrenadores) {
-                    if (ent.getIdEntrenador() == idEntrenador) {
-                        JOptionPane.showMessageDialog(this, "El ID de entrenador ya está registrado.", "Error", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                }
-
-                listaEntrenadores.add(new Entrenador(idEntrenador, nombre, apellido, telefono, correo));
-                guardarEntrenadoresEnArchivo();
-                JOptionPane.showMessageDialog(this, "Entrenador guardado exitosamente.");
-                limpiarCampos();
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "El ID debe ser un número entero.", "Error", JOptionPane.ERROR_MESSAGE);
+            if (nombre.isEmpty() || apellido.isEmpty() || telefono.isEmpty() || correo.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
             }
 
-        } else if (e.getSource() == btnModificar) {
-            try {
-                int idEntrenador = Integer.parseInt(txtIdEntrenador.getText().trim());
-                String nombre = txtNombre.getText().trim();
-                String apellido = txtApellido.getText().trim();
-                String telefono = txtTelefono.getText().trim();
-                String correo = txtCorreo.getText().trim();
-
-                boolean encontrado = false;
+            if (e.getSource() == btnGuardar) {
+                boolean existe = false;
                 for (Entrenador ent : listaEntrenadores) {
                     if (ent.getIdEntrenador() == idEntrenador) {
                         ent.setNombre(nombre);
                         ent.setApellido(apellido);
                         ent.setTelefono(telefono);
                         ent.setCorreo(correo);
-                        encontrado = true;
+                        existe = true;
                         break;
                     }
                 }
 
-                if (encontrado) {
-                    guardarEntrenadoresEnArchivo();
+                if (!existe) {
+                    listaEntrenadores.add(new Entrenador(idEntrenador, nombre, apellido, telefono, correo));
+                    JOptionPane.showMessageDialog(this, "Entrenador guardado exitosamente.");
+                } else {
                     JOptionPane.showMessageDialog(this, "Entrenador modificado exitosamente.");
+                }
+
+                guardarEntrenadoresEnArchivo();
+                limpiarCampos();
+            }
+
+            if (e.getSource() == btnEliminar) {
+                boolean eliminado = listaEntrenadores.removeIf(ent -> ent.getIdEntrenador() == idEntrenador);
+                if (eliminado) {
+                    guardarEntrenadoresEnArchivo();
+                    JOptionPane.showMessageDialog(this, "Entrenador eliminado.");
                     limpiarCampos();
-                    lblEstado.setText(" ");
                 } else {
                     JOptionPane.showMessageDialog(this, "No se encontró el entrenador con ese ID.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
-
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "El ID debe ser un número entero.", "Error", JOptionPane.ERROR_MESSAGE);
             }
 
-        } else if (e.getSource() == btnMostrar) {
-            mostrarEntrenadores();
+            if (e.getSource() == btnLimpiar) {
+                limpiarCampos();
+            }
+
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "El ID debe ser un número entero.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -261,23 +231,6 @@ public class FormularioEntrenadores extends JFrame implements ActionListener {
         txtTelefono.setText("");
         txtCorreo.setText("");
         lblEstado.setText(" ");
-    }
-
-    private void mostrarEntrenadores() {
-        if (listaEntrenadores.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No hay entrenadores registrados.", "Información", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-
-        StringBuilder lista = new StringBuilder("Entrenadores Registrados:\n");
-        for (Entrenador ent : listaEntrenadores) {
-            lista.append("\u2022 ID: ").append(ent.getIdEntrenador())
-                 .append(" - Nombre: ").append(ent.getNombre()).append(" ").append(ent.getApellido())
-                 .append(" - Tel: ").append(ent.getTelefono())
-                 .append(" - Correo: ").append(ent.getCorreo()).append("\n");
-        }
-
-        JOptionPane.showMessageDialog(this, lista.toString(), "Lista de Entrenadores", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void guardarEntrenadoresEnArchivo() {
@@ -294,7 +247,6 @@ public class FormularioEntrenadores extends JFrame implements ActionListener {
 
     private void cargarEntrenadoresDesdeArchivo() {
         listaEntrenadores.clear();
-
         try (BufferedReader br = new BufferedReader(new FileReader(ARCHIVO_ENTRENADORES))) {
             String linea;
             while ((linea = br.readLine()) != null) {
